@@ -21,10 +21,10 @@
  * THE SOFTWARE.
  */
 
-use mtab::{MTab, ReadWrite, MountingPoint};
+use mountinfo::{MountInfo, ReadWrite, MountingPoint};
 
 fn main() {
-    let mtab = MTab::new().unwrap();
+    let mtab = MountInfo::new().unwrap();
 
     println!("Read-only mount points:");
     for mount_point in mtab.mounting_points.iter().filter(|&mount_point| {

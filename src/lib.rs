@@ -119,16 +119,16 @@ impl MountOptions {
 }
 
 #[derive(Debug)]
-pub struct MTab {
+pub struct MountInfo {
     pub mounting_points: Vec<MountingPoint>
 }
 
-impl MTab {
+impl MountInfo {
 
     pub fn new() -> Result<Self, io::Error> {
         let mut mtab = File::open("/etc/mtab")?;
-        return Ok(MTab {
-            mounting_points: MTab::read_mounting_points(&mut mtab)?
+        return Ok(MountInfo {
+            mounting_points: MountInfo::parse_mtab(&mut mtab)?
         })
     }
 
@@ -148,7 +148,7 @@ impl MTab {
         filtered.len() > 0
     }
 
-    pub fn read_mounting_points(file: &mut dyn std::io::Read) -> Result<Vec<MountingPoint>, std::io::Error> {
+    pub fn parse_mtab(file: &mut dyn std::io::Read) -> Result<Vec<MountingPoint>, std::io::Error> {
         let mut results: Vec<MountingPoint> = vec![];
         let reader = io::BufReader::new(file);
         for line in reader.lines() {
@@ -197,7 +197,7 @@ mod test {
     #[test]
     fn test_load_mount_points() {
         let mut file = FakeFile { s: "tmpfs /tmp tmpfs rw,seclabel,nosuid,nodev,size=8026512k,nr_inodes=1048576,inode64 0 0".to_owned(), read: false };
-        let munt_points = MTab::read_mounting_points(&mut file).unwrap();
+        let munt_points = MountInfo::parse_mtab(&mut file).unwrap();
         assert_eq!(munt_points.len(), 1);
         assert_eq!(munt_points[0].what, "tmpfs".to_owned());
         assert_eq!(munt_points[0].path, PathBuf::from("/tmp"));
@@ -207,7 +207,7 @@ mod test {
     #[test]
     fn test_contains() {
         let mut file = FakeFile { s: "tmpfs /tmp tmpfs rw,seclabel,nosuid,nodev,size=8026512k,nr_inodes=1048576,inode64 0 0".to_owned(), read: false };
-        let mtab = MTab { mounting_points: MTab::read_mounting_points(&mut file).unwrap() };
+        let mtab = MountInfo { mounting_points: MountInfo::parse_mtab(&mut file).unwrap() };
         let mp = MountingPoint {
             what: "tmpfs".to_owned(),
             path: PathBuf::from("/tmp"),
@@ -220,7 +220,7 @@ mod test {
     #[test]
     fn test_is_mounted() {
         let mut file = FakeFile { s: "tmpfs /tmp tmpfs rw,seclabel,nosuid,nodev,size=8026512k,nr_inodes=1048576,inode64 0 0".to_owned(), read: false };
-        let mtab = MTab { mounting_points: MTab::read_mounting_points(&mut file).unwrap() };
+        let mtab = MountInfo { mounting_points: MountInfo::parse_mtab(&mut file).unwrap() };
         assert_eq!(mtab.is_mounted("/tmp"), true);
     }
 

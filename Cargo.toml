@@ -1,11 +1,11 @@
 [package]
-name = "mtab"
-version = "0.1.0"
+name = "mountinfo"
+version = "0.1.1"
 edition = "2021"
 authors = ["Guillem Castro <guillem@castrog.dev>"]
-description = "A Rust library for parsing /etc/mtab"
+description = "A Rust library for parsing mount points on Linux and other Unix systems."
 readme = "README.md"
-repository = "https://github.com/GuillemCastro/mtab-rs"
+repository = "https://github.com/GuillemCastro/mountinfo"
 license = "MIT"
 keywords = ["mtab", "fstab", "etc", "linux", "filesystem", "mount"]
 categories = ["filesystem", "os::linux-apis"]
