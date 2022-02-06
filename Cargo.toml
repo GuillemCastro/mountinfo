@@ -1,6 +1,6 @@
 [package]
 name = "mountinfo"
-version = "0.1.1"
+version = "0.2.0"
 edition = "2021"
 authors = ["Guillem Castro <guillem@castrog.dev>"]
 description = "A Rust library for parsing mount points on Linux and other Unix systems."
@@ -9,3 +9,6 @@ repository = "https://github.com/GuillemCastro/mountinfo"
 license = "MIT"
 keywords = ["mtab", "fstab", "etc", "linux", "filesystem", "mount"]
 categories = ["filesystem", "os::linux-apis"]
+
+[dependencies]
+regex = "1"

@@ -21,7 +21,7 @@
  * THE SOFTWARE.
  */
 
-use mountinfo::{MountInfo, ReadWrite, MountingPoint};
+use mountinfo::{MountInfo, ReadWrite, MountPoint};
 
 fn main() {
     let mtab = MountInfo::new().unwrap();
@@ -32,7 +32,7 @@ fn main() {
             ReadWrite::ReadOnly => true,
             _ => false
         }
-    }).collect::<Vec<&MountingPoint>>() {
+    }).collect::<Vec<&MountPoint>>() {
         println!("{:?}", mount_point);
     }
 
@@ -42,7 +42,7 @@ fn main() {
             ReadWrite::ReadWrite => true,
             _ => false
         }
-    }).collect::<Vec<&MountingPoint>>() {
+    }).collect::<Vec<&MountPoint>>() {
         println!("{:?}", mount_point);
     }
 }
