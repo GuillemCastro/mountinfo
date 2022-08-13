@@ -223,20 +223,16 @@ impl MountInfo {
     /// Check if a certain filesystem type is mounted at the given path. 
     pub fn contains<P: AsRef<Path>>(&self, mounting_point: P, fstype: FsType) -> bool {
         let path = mounting_point.as_ref();
-        let filtered: Vec<&MountPoint> = self.mounting_points.iter().
-            filter(|mts| 
-                mts.path == path.to_owned() && mts.fstype == fstype)
-            .collect();
-        filtered.len() > 0
+        self.mounting_points
+            .iter()
+            .any(|mts| &mts.path == path && mts.fstype == fstype)
     }
 
     /// Check if the given path is a mount point.
     pub fn is_mounted<P: AsRef<Path>>(&self, path: P) -> bool {
-        let filtered: Vec<&MountPoint> = self.mounting_points.iter().
-            filter(|mts| 
-                mts.path == path.as_ref().to_path_buf())
-            .collect();
-        filtered.len() > 0
+        self.mounting_points
+            .iter()
+            .any(|mts| &mts.path == path.as_ref())
     }
 
     fn parse_proc_mountinfo(file: &mut dyn std::io::Read) -> Result<Vec<MountPoint>, std::io::Error> {
