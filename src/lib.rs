@@ -116,31 +116,6 @@ pub struct MountPoint {
     pub options: MountOptions,
 }
 
-impl MountPoint {
-    
-    /// Creates a new mount point from a line of the `/proc/self/mountinfo` file.
-    fn parse_proc_mountinfo_line(line: &String) -> Result<Self, io::Error> {
-        // The line format is:
-        // <id> <parent_id> <major>:<minor> <root> <mount_point> <mount_options> <optional tags> "-" <fstype> <mount souce> <super options>
-        // Ref: https://www.kernel.org/doc/Documentation/filesystems/proc.txt - /proc/<pid>/mountinfo - Information about mounts
-        let re = Regex::new(r"(\d*)\s(\d*)\s(\d*:\d*)\s([\S]*)\s([\S]*)\s([A-Za-z0-9,]*)\s([A-Za-z0-9:\s]*)\s\- ([\S]*)\s([\S]*)(.*)").unwrap();
-        if !re.is_match(line) {
-            return Err(io::Error::new(io::ErrorKind::InvalidData, "Invalid format"));
-        }
-        let caps = re.captures(line).unwrap();
-        Ok(MountPoint {
-            id: Some(caps[1].parse::<u32>().unwrap()),
-            parent_id: Some(caps[2].parse::<u32>().unwrap()),
-            root: Some(PathBuf::from(caps[4].to_string())),
-            path: PathBuf::from(caps[5].to_string()),
-            options: MountOptions::new(&caps[6].to_string()),
-            fstype: FsType::from_str(&caps[8]).unwrap(),
-            what: caps[9].to_string()
-        })
-    }
-
-}
-
 #[derive(Debug)]
 #[derive(PartialEq)]
 pub enum ReadWrite {
@@ -240,10 +215,25 @@ impl MountInfo {
     }
 
     fn parse_proc_mountinfo(file: &mut dyn std::io::Read) -> Result<Vec<MountPoint>, std::io::Error> {
+        // The line format is:
+        // <id> <parent_id> <major>:<minor> <root> <mount_point> <mount_options> <optional tags> "-" <fstype> <mount souce> <super options>
+        // Ref: https://www.kernel.org/doc/Documentation/filesystems/proc.txt - /proc/<pid>/mountinfo - Information about mounts
+        let re = Regex::new(r"(\d*)\s(\d*)\s(\d*:\d*)\s([\S]*)\s([\S]*)\s([A-Za-z0-9,]*)\s([A-Za-z0-9:\s]*)\s\- ([\S]*)\s([\S]*)(.*)").unwrap();
         let mut result = Vec::new();
         let reader = io::BufReader::new(file);
         for line in reader.lines() {
-            let mpoint = MountPoint::parse_proc_mountinfo_line(&line?)?;
+            let line = line?;
+            let caps = re.captures(&line)
+                .ok_or_else(|| io::Error::new(io::ErrorKind::InvalidData, "Invalid format"))?;
+            let mpoint = MountPoint {
+                id: Some(caps[1].parse::<u32>().unwrap()),
+                parent_id: Some(caps[2].parse::<u32>().unwrap()),
+                root: Some(PathBuf::from(caps[4].to_string())),
+                path: PathBuf::from(caps[5].to_string()),
+                options: MountOptions::new(&caps[6].to_string()),
+                fstype: FsType::from_str(&caps[8]).unwrap(),
+                what: caps[9].to_string()
+            };
             result.push(mpoint);
         }
         Ok(result)
